@@ -9,10 +9,27 @@
 import UIKit
 import Alamofire
 
+private let kViewHomeCell = "kViewHomeCell"
+
 class ViewController: UIViewController {
 
     // mark 懒加载属性
     fileprivate lazy var newsModels:[NewsModel] = [NewsModel]()
+    
+    fileprivate lazy var tableview :UITableView = {[unowned self] in
+    
+        let tableview = UITableView()
+        
+        tableview.frame = self.view.bounds
+        tableview.dataSource = self
+        tableview.rowHeight = 100
+
+        tableview.register(UINib(nibName: "NewViewTableViewCell", bundle: nil), forCellReuseIdentifier: kViewHomeCell)
+        
+        
+        
+        return tableview
+    }()
     
     
     override func viewDidLoad() {
@@ -20,10 +37,14 @@ class ViewController: UIViewController {
     
         setUpNavgationbar()
         
+        view.addSubview(tableview)
+        
         loadData()
        
-        
     }
+    
+
+    
 }
 
 // 设置ui 界面
@@ -56,7 +77,6 @@ extension ViewController{
     }
 }
 
-
 // 网络数据请求
 extension ViewController{
 
@@ -79,9 +99,32 @@ extension ViewController{
             
             }
             
-            // 刷新表
+            // 刷新表格
+            self.tableview.reloadData()
         }
     
     }
+
+}
+
+// 实现数据源
+extension ViewController:UITableViewDataSource{
+
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        
+        return newsModels.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+     
+        let cell =  tableview.dequeueReusableCell(withIdentifier: kViewHomeCell, for: indexPath) as! NewViewTableViewCell
+        
+        // 赋值
+        cell.newModel = newsModels[indexPath.row]
+        
+        return cell
+    }
+
 
 }
